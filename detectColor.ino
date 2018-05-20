@@ -9,42 +9,32 @@ void readRGB(float colors[])
   float r, g, b;
   r = red; r /= sum;  g = green; g /= sum;  b = blue; b /= sum;
   r *= 256; g *= 256; b *= 256;
-
-  colors[0] = r;
-  colors[1] = g;
-  colors[2] = b;
-  
+  colors[0] = r;  colors[1] = g;  colors[2] = b;  
   return;
 }
 
 byte readColor(float col [])
 { 
  byte  colorCode = 0;
- float red, grn, blu;
+ byte red, grn, blu;
  String color = "NO_COLOR";
- red = col[0];
- grn = col[1];
- blu = col[2];
+ red = round(col[0]);
+ grn = round(col[1]);
+ blu = round(col[2]);
 
- byte redMin = 45;  byte redMax = 67;
- byte grnMin = 48; byte grnMax = 56;
- byte bluMin = 48; byte bluMax = 52;
+  // LL = lowlow, L = low, H = high, HH = highhigh
+ byte redLL = 45; byte redL = 50; byte redH = 57; byte redHH = 68; 
+ byte grnLL = 37; byte grnL = 44; byte grnH = 48; byte grnHH = 54;
+ byte bluLL = 37; byte bluL = 48; byte bluH = 51;
 
- float ylwCoeff = 0.70;
- float magCoeff = 0.7;
- float redCoeff = 0.8;
- float bluCoeff = 0.85;
- float orgCoeff = 0.77;
+  if (red > redHH && grn < grnL && blu < bluL)   {color = "RED"; colorCode = 1;}
+  else if (red > redHH  && grn < grnL && blu > bluLL )   {color = "MAGENTA"; colorCode = 4;}
+  else if (red > redL && red < redHH && grn > grnL && blu < bluH)   {color = "YELLOW"; colorCode = 5;}
+  else if (red > redL &&  grn > grnLL && grn < grnHH && blu < bluL)   {color = "ORANGE"; colorCode = 6;}
+  else if (red < redH && grn > grnHH && blu < bluH)  { color = "GREEN"; colorCode = 2;}
+  else if (red < redH && grn < grnHH && blu > bluH)  { color = "BLUE"; colorCode = 3;}
+  else { color = "NO COLOR"; colorCode = 0;}
 
-  if (red > magCoeff*redMax && grn < (0.1+magCoeff)*grnMin && blu < bluMin )   {color = "MAGENTA"; colorCode = 4;}
-  if (red < redMin && grn > grnMax && blu < bluMin)  { color = "GREEN"; colorCode = 2;}
-  if (red < redMin/bluCoeff && grn < grnMin/bluCoeff && blu > bluMax)  { color = "BLUE"; colorCode = 3;}
-  if (red > orgCoeff*redMax && grn > (orgCoeff-0.3)*grnMax && blu < bluMin*orgCoeff)   {color = "ORANGE"; colorCode = 6;}
-  if (red > ylwCoeff*redMax && grn > ylwCoeff*redMax && blu < bluMin*ylwCoeff)   {color = "YELLOW"; colorCode = 5;}
-  if (red > redMax && grn < grnMin && blu < bluMin*redCoeff)   {color = "RED"; colorCode = 1;}
-
-  //Serial.println(color);
-  
   return colorCode;
 }
 

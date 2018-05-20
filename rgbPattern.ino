@@ -3,26 +3,25 @@
 
 // Pick analog outputs for the vibration motors
 const byte pin[] = {5,6,9};
-const byte motorsNumber = sizeof(pin)/sizeof(pin[0]);
+const byte motorsNumber = sizeof(pin)/sizeof(pin[0]); // number of vibration motors
 
 // WARNING: Pin 8 is broken.
 // WARNING: To fix it, pin 9 and pin 8 are (physically) connected by a metal wire!
 
 // Max strength of the motor vibration. REDUCE if vibrations are too intense/annoying. Range 1-255. 
-const byte MAX_VIBRATION_INTENSITY = 110; 
+const byte MAX_VIBRATION_INTENSITY = 150; 
 
 // Buffer size. The longer the buffer size, the higher the accuracy in the color detection, the slower the change from one color to another. Default: 10 samples.
-const byte MemorySize= 8;
+const byte MemorySize= 9;
 
 // Vibration interval. Set the speed of the motors. Default: 250ms.
-const unsigned long vibrationInterval = 320;
+const unsigned long vibrationInterval = 250;
+
+// Vibration pattern length: duration of the "Step sequencer". For example, if longer, red will vibrate at a slower rhythm.
+const byte vibrationPatternLength = 3*motorsNumber; // Each color has a vibration pattern which lasts 6 steps.
 
 byte oldCodes[MemorySize];
 unsigned long previousVibrTime = 0;
-const byte vibrationPatternLength = 3*motorsNumber; // Each color has a vibration pattern which lasts 6 steps.
-  
-//const unsigned long ledInterval = 20;
-//unsigned long previousLedTime = 0;
 
 byte previousColorCode = 0;byte previousVibratingPin = 0;
 byte vibrationIndex = 0;bool newVibrationPattern = true;
@@ -34,7 +33,8 @@ String colorNames[colorNum] = { "No color","RED","GREEN","BLUE","MAGENTA","YELLO
   
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_4X);
 
-//int [] readRGB()
+//const unsigned long ledInterval = 20;
+//unsigned long previousLedTime = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -50,6 +50,8 @@ void setup() {
 
   // Initialize the array "oldCodes" to all zeros
   memset(oldCodes,0,MemorySize);
+
+  vibrate(0, 0); // do not vibrate
 }
 
 void loop() {
@@ -58,12 +60,13 @@ void loop() {
   byte colorCode = 0;
   unsigned long currentTime = millis();
   
-  //  Serial.print((int)colors[0]);Serial.print("\t");  //  Serial.print((int)colors[1]);Serial.print("\t");  //  Serial.println((int)colors[2]);
   //Serial.print(" New   code:\t ");   Serial.print(temporaryColorCode);  //Serial.print(" Color code:\t ");   Serial.println(colorCode);
 
   if (currentTime - previousVibrTime >= vibrationInterval) { // Every "vibrationInterval" milliseconds, read a new color
     readRGB(colors);   
-  
+
+    Serial.print((int)colors[0]);Serial.print("\t");   Serial.print((int)colors[1]);Serial.print("\t");    Serial.println((int)colors[2]);
+    
     // The newly read COLOR.
     temporaryColorCode = readColor(colors);     
   

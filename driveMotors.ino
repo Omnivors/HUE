@@ -9,7 +9,7 @@ void driveMotors(byte colorCode, byte *vibrCount)
   }
   else if (colorCode == previousColorCode && !(colorCode==0)){
     vibrate(colorCode, (*vibrCount));
-    newVibrationPattern = false; // PENSO CHE QUESTE DUE RIGHE ANDREBBERO SCAMBIATE?
+    newVibrationPattern = false; 
     (*vibrCount)++;
   }
   else if (colorCode==0){
@@ -23,6 +23,7 @@ void driveMotors(byte colorCode, byte *vibrCount)
 }
 
 void vibrate(byte code, byte count){
+  const byte halfMotors = floor(motorsNumber/2);
   byte power[motorsNumber];
   byte vibratingPin = motorsNumber;
 
@@ -39,6 +40,14 @@ void vibrate(byte code, byte count){
   
   if ((code == 1) && ((count % vibrationPatternLength ) == 0)) { // RED
       memset(power, MAX_VIBRATION_INTENSITY, motorsNumber);
+  }
+  else if (code == 6){ // ORANGE
+    if ((count % 2) == 0){
+        memset(&power[motorsNumber-halfMotors], MAX_VIBRATION_INTENSITY, motorsNumber);
+    }
+    else {
+      memset(power, MAX_VIBRATION_INTENSITY, halfMotors+1);
+    }
   }
   else if ( (code == 2) || (code == 3) || (code==5) ){ //SINGLE PIN VIBRATING
     if (code == 2){ // GREEN
@@ -66,9 +75,12 @@ void vibrate(byte code, byte count){
       if (count == 0 ){
           vibratingPin = rand() % motorsNumber; // Return a number ranging in [0, motorsNumber-1]
       }
+      else if (count == 1){ 
+          vibratingPin = previousVibratingPin;
+      }
     }
-
-    if (vibratingPin != motorsNumber){
+    
+    if (vibratingPin != motorsNumber){ // If a color has been detected
       power[vibratingPin] = MAX_VIBRATION_INTENSITY; // Activate the selected motor
       previousVibratingPin = vibratingPin;
     }
